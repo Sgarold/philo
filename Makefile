@@ -1,2 +1,2 @@
 all:
-	gcc -pthread main.c
+	gcc -pthread philo.c

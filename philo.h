@@ -5,25 +5,31 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <time.h>
+#include <sys/time.h>
 
 typedef struct s_philo
 {
-	int index;
-	pthread_mutex_t left_fork;
-	pthread_mutex_t right_fork;
-	int last_meal;
-	int	num_meals;
-}				t_philo;
+	int				index;
+	long long		last_meal;
+	int				num_meals;
+	pthread_mutex_t	*left_fork;
+	pthread_mutex_t	*right_fork;
+}					t_philo;
 
 typedef struct s_table
 {
-	int num_of_phlio;
-	int time_to_die;
-	int time_to_eat;
-	int time_to_sleep;
-	int num_of_times;
-	int error_flag;
+	int					num_of_phlio;
+	int					time_to_die;
+	int					time_to_eat;
+	int					time_to_sleep;
+	int					num_of_times;
+	int					error_flag;
+	int					index;
+	unsigned long long	start;
+	t_philo				*philos;
+	pthread_mutex_t		*typing;
+	pthread_mutex_t		**forks;
+	struct timeval		timer;
 }			t_table;
 
 
