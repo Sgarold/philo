@@ -54,6 +54,7 @@ void	philo_init(t_table *table, int i)
 {
 	table->philos[i].index = i + 1;
 	table->philos[i].num_meals = 0;
+	table->philos[i].flag = 1;
 	table->philos[i].right_fork = table->forks[i];
 	if (i + 1 == table->num_of_phlio)
 		table->philos[i].left_fork = table->forks[0];
@@ -97,6 +98,20 @@ long long	get_time_ms(struct timeval start)
 	return ((now.tv_usec * 0.001) + (now.tv_sec * 1000));
 }
 
+void	usleeper(long long time, struct timeval now)
+{
+	long long	cur_time;
+
+	cur_time = get_time_ms(now);
+	usleep((time - 15) * 1000);
+	while (1)
+	{
+		usleep(50);
+		if (get_time_ms(now) >= cur_time + time)
+			break ;
+	}
+}
+
 void	change_status(t_table *table, char *str, int i, int flag)
 {
 	i++;
@@ -109,19 +124,17 @@ void	change_status(t_table *table, char *str, int i, int flag)
 
 void	philo_eats_odd(t_table *table, int i)
 {
-	if ((table->num_of_phlio % 2))
-		usleep(5);
 	pthread_mutex_lock(table->philos[i].left_fork);
 	change_status(table, "has taken a fork", i, 0);
 	pthread_mutex_lock(table->philos[i].right_fork);
 	change_status(table, "has taken a fork", i, 0);
 	change_status(table, "is eating", i, 0);
 	table->philos[i].last_meal = get_time_ms(table->timer);
-	usleep(table->time_to_eat * 1000);
+	usleeper(table->time_to_eat, table->timer);
 	pthread_mutex_unlock(table->philos[i].right_fork);
 	pthread_mutex_unlock(table->philos[i].left_fork);
 	change_status(table, "is sleeping", i, 0);
-	usleep(table->time_to_sleep);
+	usleeper(table->time_to_sleep, table->timer);
 	change_status(table, "is thinking", i, 0);
 }
 
@@ -133,21 +146,26 @@ void	philo_eats_even(t_table *table, int i)
 	change_status(table, "has taken a fork", i, 0);
 	table->philos[i].last_meal = get_time_ms(table->timer);
 	change_status(table, "is eating", i, 0);
-	usleep(table->time_to_eat * 1000);
+	usleeper(table->time_to_eat, table->timer);
 	pthread_mutex_unlock(table->philos[i].left_fork);
 	pthread_mutex_unlock(table->philos[i].right_fork);
 	change_status(table, "is sleeping", i, 0);
-	usleep(table->time_to_sleep);
+	usleeper(table->time_to_sleep, table->timer);
 	change_status(table, "is thinking", i, 0);
 }
 
 void	*philo_funk(void *arg)
 {
-	t_table	*table;
-	int		philo_index;
+	t_table		*table;
+	int			philo_index;
 
 	table = (t_table *)arg;
 	philo_index = table->index++;
+	if (!(table->num_of_phlio % 2) && philo_index % 2 && table->philos[philo_index].flag)
+	{
+		table->philos[philo_index].flag = 0;
+		usleep(100);
+	}
 	while (table->philos[philo_index].num_meals != table->num_of_times)
 	{
 		if (philo_index % 2)

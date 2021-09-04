@@ -14,6 +14,7 @@ typedef struct s_philo
 	int				num_meals;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
+	int				flag;
 }					t_philo;
 
 typedef struct s_table
