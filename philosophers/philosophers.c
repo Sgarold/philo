@@ -1,6 +1,6 @@
 #include "philosophers.h"
 
-void	parser(int argc, char **argv, t_table *table)
+void	parser(int argc, char **argv, t_table *t)
 {
 	int	i;
 	int	err;
@@ -9,18 +9,21 @@ void	parser(int argc, char **argv, t_table *table)
 	err = 0;
 	if (argc == 6 || argc == 5)
 	{
-		table->num_of_phlio = ft_atoi_err(argv[1], &err);
-		table->time_to_die = ft_atoi_err(argv[2], &err);
-		table->time_to_eat = ft_atoi_err(argv[3], &err);
-		table->time_to_sleep = ft_atoi_err(argv[4], &err);
+		t->num_of_phlio = ft_atoi_err(argv[1], &err);
+		t->time_to_die = ft_atoi_err(argv[2], &err);
+		t->time_to_eat = ft_atoi_err(argv[3], &err);
+		t->time_to_sleep = ft_atoi_err(argv[4], &err);
 		if (argc == 6)
-			table->num_of_times = ft_atoi_err(argv[5], &err);
+			t->num_of_times = ft_atoi_err(argv[5], &err);
 		else
-			table->num_of_times = 2147483647;
-		table->error_flag = err;
+			t->num_of_times = 2147483647;
+		if (t->num_of_phlio < 2 || t->time_to_die < 120 || t->time_to_eat < 60 \
+		|| t->time_to_sleep < 60 || t->num_of_times < 0)
+			write(1, "Not valid args\n", 16), err = 1;
+		t->error_flag = err;
 	}
 	else
-		table->error_flag = 1;
+		t->error_flag = 1;
 }
 
 void	philo_init(t_table *table, int i)
