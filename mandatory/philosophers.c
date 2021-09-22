@@ -9,7 +9,7 @@ void	parser(int argc, char **argv, t_table *t)
 	err = 0;
 	if (argc == 6 || argc == 5)
 	{
-		t->num_of_phlio = ft_atoi_err(argv[1], &err);
+		t->num_of_philo = ft_atoi_err(argv[1], &err);
 		t->time_to_die = ft_atoi_err(argv[2], &err);
 		t->time_to_eat = ft_atoi_err(argv[3], &err);
 		t->time_to_sleep = ft_atoi_err(argv[4], &err);
@@ -17,9 +17,9 @@ void	parser(int argc, char **argv, t_table *t)
 			t->num_of_times = ft_atoi_err(argv[5], &err);
 		else
 			t->num_of_times = 2147483647;
-		if (t->num_of_phlio < 2 || t->time_to_die < 120 || t->time_to_eat < 60 \
+		if (t->num_of_philo < 2 || t->time_to_die < 120 || t->time_to_eat < 60 \
 		|| t->time_to_sleep < 60 || t->num_of_times < 0)
-			write(1, "Not valid args\n", 16), err = 1;
+			err = 1;
 		t->error_flag = err;
 	}
 	else
@@ -33,29 +33,36 @@ void	philo_init(t_table *table, int i)
 	table->philos[i].flag = 1;
 	table->philos[i].philo_is_full = 0;
 	table->philos[i].right_fork = table->forks[i];
-	if (i + 1 == table->num_of_phlio)
+	if (i + 1 == table->num_of_philo)
 		table->philos[i].left_fork = table->forks[0];
 	else
 		table->philos[i].left_fork = table->forks[i + 1];
 }	
 
-void	table_init(t_table *table)
+void	table_init(t_table *table, int i)
 {
-	int	i;
-
-	i = 0;
 	table->index = 0;
-	table->forks = malloc(sizeof(pthread_mutex_t *) * table->num_of_phlio);
-	while (i < table->num_of_phlio)
-		table->forks[i++] = malloc(sizeof(pthread_mutex_t));
+	table->forks = malloc(sizeof(pthread_mutex_t *) * table->num_of_philo);
+	if (!table->forks)
+		exit(10);
+	while (i < table->num_of_philo)
+	{
+		table->forks[i] = malloc(sizeof(pthread_mutex_t));
+		if (!table->forks[i++])
+			exit(11);
+	}
 	i = 0;
-	while (i < table->num_of_phlio)
+	while (i < table->num_of_philo)
 		pthread_mutex_init(table->forks[i++], NULL);
 	table->typing = malloc(sizeof(pthread_mutex_t));
+	if (!table->typing)
+		exit(14);
 	pthread_mutex_init(table->typing, NULL);
-	table->philos = malloc(sizeof(t_philo) * table->num_of_phlio);
+	table->philos = malloc(sizeof(t_philo) * table->num_of_philo);
+	if (!table->philos)
+		exit(12);
 	i = 0;
-	while (i < table->num_of_phlio)
+	while (i < table->num_of_philo)
 		philo_init(table, i++);
 	table->start = gettimeofday(&table->timer, NULL);
 }
@@ -63,15 +70,21 @@ void	table_init(t_table *table)
 void	thread_creating(t_table *table)
 {
 	pthread_t	*threads;
+	pthread_t	*death_check;
 	int			i;
 
 	i = 0;
-	threads = malloc(sizeof(pthread_t) * table->num_of_phlio);
-	while (i < table->num_of_phlio)
+	threads = malloc(sizeof(pthread_t) * table->num_of_philo);
+	if (!threads)
+		exit(15);
+	while (i < table->num_of_philo)
 		pthread_create(threads + i++, NULL, philo_funk, table);
 	i = 0;
-	death_checker(table);
-	while (i < table->num_of_phlio)
+	death_check = malloc(sizeof(pthread_t));
+	if (!death_check)
+		exit(13);
+	pthread_create(death_check, NULL, death_checker, table);
+	while (i < table->num_of_philo)
 		pthread_join(threads[i++], NULL);
 }
 
@@ -81,7 +94,10 @@ int	main(int argc, char **argv)
 
 	parser(argc, argv, &table);
 	if (table.error_flag)
+	{
+		write(1, "Not valid args\n", 16);
 		return (0);
-	table_init(&table);
+	}
+	table_init(&table, 0);
 	thread_creating(&table);
 }

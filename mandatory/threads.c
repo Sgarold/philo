@@ -38,12 +38,12 @@ void	*philo_funk(void *arg)
 
 	table = (t_table *)arg;
 	i = table->index++;
-	if (!(table->num_of_phlio % 2) && i % 2 && table->philos[i].flag)
+	if (!(table->num_of_philo % 2) && i % 2 && table->philos[i].flag)
 	{
 		table->philos[i].flag = 0;
 		usleep(100);
-		if (i + 1 == table->num_of_phlio)
-			usleep(100);
+		if (i + 1 == table->num_of_philo)
+			usleep(200);
 	}
 	while (1)
 	{

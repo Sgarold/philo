@@ -66,15 +66,17 @@ void	change_status(t_table *table, char *str, int i, int flag)
 	pthread_mutex_unlock(table->typing);
 }
 
-void	death_checker(t_table *table)
+void	*death_checker(void *arg)
 {
-	int	i;
-	int	flag;
+	int		i;
+	int		flag;
+	t_table	*table;
 
+	table = (t_table *)arg;
 	while (1)
 	{
 		i = 0;
-		while (i < table->num_of_phlio)
+		while (i < table->num_of_philo)
 		{
 			if (get_time_ms(table->timer) - \
 			 table->philos[i].last_meal \
@@ -84,10 +86,10 @@ void	death_checker(t_table *table)
 		}
 		flag = 0;
 		i = 0;
-		while (i < table->num_of_phlio)
+		while (i < table->num_of_philo)
 			if (table->philos[i++].num_meals >= table->num_of_times)
 				flag++;
-		if (flag == table->num_of_phlio)
-			change_status(table, "philos are full", table->num_of_phlio - 1, 1);
+		if (flag == table->num_of_philo)
+			change_status(table, "philos are full", table->num_of_philo - 1, 1);
 	}
 }
