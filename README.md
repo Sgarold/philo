@@ -6,6 +6,7 @@
 Запуск основной части:
 
   make
+  
   ./philosophers 2 410 200 200 5
 
 
@@ -19,6 +20,7 @@
 Запуск бонусной части:
 
   make bonus
+  
   ./bonus_philosophers 2 410 200 200 5
   
   
